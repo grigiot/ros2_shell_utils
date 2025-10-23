@@ -7,7 +7,7 @@ echo "HEY I'M SETTING UP ROS AND GAZEBO!"
 source /usr/share/gazebo/setup.sh
 source /opt/ros/humble/setup.zsh
 source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.zsh
-export TURTLEBOT3_MODEL=burger # at least for LAB02
+
 # FIX FOR argcomplete for ros2 & colcon
 eval "$(register-python-argcomplete3 ros2)"
 eval "$(register-python-argcomplete3 colcon)"
