@@ -3,14 +3,15 @@
 # TAKE THE CONFIG FILE
 ROS2_WS_CONFIG="$HOME/.ros2_setup.config"
 
-echo "HEY I'M SETTING UP ROS AND GAZEBO!"
-source /usr/share/gazebo/setup.sh
-source /opt/ros/humble/setup.zsh
-source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.zsh
+SN=$(basename "$SHELL") # SN := SHELL_NAME
+
+echo "HEY I'M SETTING UP ROS AND GAZEBO FOR ${SN}"
+source /opt/ros/jazzy/setup.${SN}
+source /usr/share/colcon_argcomplete/hook/colcon-argcomplete.${SN}
 
 # FIX FOR argcomplete for ros2 & colcon
-eval "$(register-python-argcomplete3 ros2)"
-eval "$(register-python-argcomplete3 colcon)"
+eval "$(register-python-argcomplete ros2)"
+eval "$(register-python-argcomplete colcon)"
 
 
 if [ -f "$ROS2_WS_CONFIG" ]; then
@@ -24,15 +25,15 @@ if [ -f "$ROS2_WS_CONFIG" ]; then
     echo "📦 Loaded ROS2 workspace: $CURRENT_ROS2_WS"
 
     # Optionally source its setup script
-    if [ -f "$CURRENT_ROS2_WS/install/local_setup.sh" ]; then
-      source "$CURRENT_ROS2_WS/install/local_setup.zsh"
-      echo "🔧 Sourced: $CURRENT_ROS2_WS/install/local_setup.zsh"
+    if [ -f "$CURRENT_ROS2_WS/install/local_setup.${SN}" ]; then
+      source "$CURRENT_ROS2_WS/install/local_setup.${SN}"
+      echo "🔧 Sourced: $CURRENT_ROS2_WS/install/local_setup.${SN}"
     fi
   else
     echo "⚠️ Saved ROS2 workspace not found: $CURRENT_ROS2_WS"
   fi
 else
-  echo "ℹ️ No saved ROS2 workspace (set one with 'setws <path>')."
+  echo "ℹ️ No saved ROS2 workspace (set one with 'set_ros2_ws <path>')."
 fi
 
 alias cw="cd \"$CURRENT_ROS2_WS\""
@@ -40,12 +41,13 @@ alias cs="cd \"$CURRENT_ROS2_WS/src\""
 alias codes="code \"$CURRENT_ROS2_WS/src\""
 set_ros2_ws() {
   if [ -z "$1" ]; then
-    echo "Usage: setws <path_to_workspace>"
+    echo "Usage: set_ros2_ws <path_to_workspace>"
     return 1
   fi
 
   local ws_path="$1"
   ws_path="${ws_path/#\~/$HOME}"  # expand ~
+
 
   if [ ! -d "$ws_path" ]; then
     echo "❌ Directory not found: $ws_path"
@@ -57,11 +59,11 @@ set_ros2_ws() {
   echo "✅ Workspace set to: $CURRENT_ROS2_WS"
 
   # Try to source the workspace setup if it exists
-  if [ -f "$CURRENT_ROS2_WS/install/local_setup.sh" ]; then
-    source "$CURRENT_ROS2_WS/install/local_setup.zsh"
-    echo "🔧 Sourced: $CURRENT_ROS2_WS/install/local_setup.zsh"
+  if [ -f "$CURRENT_ROS2_WS/install/local_setup.${SN}" ]; then
+    source "$CURRENT_ROS2_WS/install/local_setup.${SN}"
+    echo "🔧 Sourced: $CURRENT_ROS2_WS/install/local_setup.${SN}"
   else
-    echo "⚠️ No install/local_setup.zsh found in this workspace (maybe not built yet?)"
+    echo "⚠️ No install/local_setup.${SN} found in this workspace (maybe not built yet?)"
   fi
 }
 
@@ -81,11 +83,11 @@ build_and_source() {
 
   cd "$CURRENT_ROS2_WS" || return 1
 
-  colcon build --symlink-install
+  colcon build
 
-  if [ -f "$CURRENT_ROS2_WS/install/local_setup.zsh" ]; then
-    source "$CURRENT_ROS2_WS/install/local_setup.zsh"
-    echo "🔧 Sourced install/local_setup.zsh"
+  if [ -f "$CURRENT_ROS2_WS/install/local_setup.${SN}" ]; then
+    source "$CURRENT_ROS2_WS/install/local_setup.${SN}"
+    echo "🔧 Sourced install/local_setup.${SN}"
   fi
 
   cd "$prev_dir" || return 1
@@ -102,15 +104,15 @@ just_source() {
     return 1
   fi
 
-  if [ ! -d "$CURRENT_ROS2_WS/install" -o ! -f "$CURRENT_ROS2_WS/install/local_setup.zsh" ]; then
+  if [ ! -d "$CURRENT_ROS2_WS/install" -o ! -f "$CURRENT_ROS2_WS/install/local_setup.${SN}" ]; then
     echo "❌ $CURRENT_ROS2_WS does not look like a ROS2 workspace (missing install/)"
     return 1
   fi
 
   echo "🚀 Building workspace at: $CURRENT_ROS2_WS"
 
-  source "$CURRENT_ROS2_WS/install/local_setup.zsh"
-  echo "🔧 Sourced $CURRENT_ROS2_WS/install/local_setup.zsh"
+  source "$CURRENT_ROS2_WS/install/local_setup.${SN}"
+  echo "🔧 Sourced $CURRENT_ROS2_WS/install/local_setup.${SN}"
   zle reset-prompt
 }
 
